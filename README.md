@@ -1,2 +1,2 @@
 # shinkeisuijaku
-神経衰弱ゲー
+javaScriptで神経衰弱
