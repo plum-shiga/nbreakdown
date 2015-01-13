@@ -14,52 +14,52 @@
   <p>Score: <span id = "score"></span></p>
   <div id = "stage"></div>
   <script>
-  (function(){
+  (function() {
     var cards = [],//cards[n]には0011がそれぞれ順序ランダムで4つ入る
 
-    CARD_NUM = 16,
-    currentNum, //今開けたカードに何の数字が書かれていたか
-    openedCard, // どのカードを開けたかを管理
-    correctNum = 0,
-    enableFlip = true,
-    score = 0,
-    timerID;
+      CARD_NUM = 16,
+      currentNum, //今開けたカードに何の数字が書かれていたか
+      openedCard, // どのカードを開けたかを管理
+      correctNum = 0,
+      enableFlip = true,
+      score = 0,
+      timerID;
 
 /*
    カードをめくった時のメソッド
  */
-    function flip(card){
-      if(!enableFlip){
+    function flip(card) {
+      if (!enableFlip) {
         //flip()中に連打させない
         return;
       }
-      if(card.value != '?'){
+      if (card.value != '?') {
         return;
       }
       card.value = card.dataset.num;
-      if(typeof currentNum === 'undefined'){
+      if (typeof currentNum === 'undefined') {
         // 上で開けたカードが1枚目のカードかを判定する
         openedCard = card; 
         currentNum = card.dataset.num;
-      }else{
+      } else {
         //2枚目をめくっているときの動作
         judge(card);
         currentNum = undefined;
       }
     }
 
-    function judge(card){
-      if(currentNum == card.dataset.num){
+    function judge(card) {
+      if (currentNum == card.dataset.num) {
         //正解
         correctNum++;
-        if(correctNum == CARD_NUM/2){
+        if(correctNum == CARD_NUM/2) {
           clearTimeout(timerId);
           alert("your score is .." + document.getElementById('score').innerHTML);
         }
-      } else{
+      } else {
         //不正解
         enableFlip = false;
-        setTimeout(function(){
+        setTimeout(function() {
           //前回の
           openedCard.value = '?'
           //今回の
@@ -72,17 +72,17 @@
 /*
    初期化メソッド
  */
-    function initCards(){
+    function initCards() {
       var num,
           cardIndex,
           i,
           stage = document.getElementById('stage');
        
-      for(i = 0; i < CARD_NUM; i++){
+      for(i = 0; i < CARD_NUM; i++) {
         num = Math.floor(i/2);
-        do{
-          cardIndex = Math.floor(Math.random()*CARD_NUM);
-        }while(typeof cards[cardIndex] !== 'undefined');
+        do {
+          cardIndex = Math.floor(Math.random() * CARD_NUM);
+        } while(typeof cards[cardIndex] !== 'undefined');
         cards[cardIndex] = createCard(num);
       }
      /*      
@@ -93,9 +93,9 @@
         }
       }
       */
-      for(i=0; i< CARD_NUM; i++){
+      for(i=0; i < CARD_NUM; i++) {
         stage.appendChild(cards[i]);
-        if(i % Math.sqrt(CARD_NUM)==(Math.sqrt(CARD_NUM)-1)){
+        if (i % Math.sqrt(CARD_NUM)==(Math.sqrt(CARD_NUM)-1)) {
           stage.appendChild(document.createElement('br'));
         }
       }
@@ -104,7 +104,7 @@
   /*
      cardの動的生成
    */
-    function createCard(num){
+    function createCard(num) {
       var card = document.createElement('input');
       card.type = 'button';
       card.value = '?';
@@ -117,11 +117,11 @@
   /*
      早く全部開くことができた方が良いという形にするためタイマーで測定
    */
-    function runTimer(){
+    function runTimer() {
       document.getElementById('score').innerHTML = score++;
-      timerId = setTimeout(function(){
+      timerId = setTimeout(function() {
         runTimer();
-      },100);
+      }, 100);
     }
     initCards();
     runTimer();
