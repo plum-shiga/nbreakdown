@@ -1,77 +1,109 @@
 (function() {
-  /* グローバル変数一式 */
-  var CARD_NUM = 16,
-      currentNum, //今開けたカードに何の数字が書かれていたか
-      openedCard; // どのカードを開けたかを管理
-  
   var Card = function() {
-    var cards = [];//cards[n]には0011がそれぞれ順序ランダムで4つ入る
-
-    /*
-     * カードの数字をランダムに割り当てるメソッド
-     */
-    this.initCards = function() {
-      var num,
-          cardIndex,
-          i,
-          stage = document.getElementById('stage');
-      for(i = 0; i < CARD_NUM; i++) {
-        num = Math.floor(i/2);
-        do {
-          cardIndex = Math.floor(Math.random() * CARD_NUM);
-        } while(typeof cards[cardIndex] !== 'undefined');
-
-        var view = new View();
-        cards[cardIndex] = view.createCard(num);
-        
-      }
-      for(i=0; i< CARD_NUM; i++) {
-        stage.appendChild(cards[i]);
-        if (i % Math.sqrt(CARD_NUM)==(Math.sqrt(CARD_NUM)-1)) {
-          stage.appendChild(document.createElement('br'));
-        }
-      }
-    };
-    /* initCards() ここまで */
+    var cardElements;
+    var openedCard;
+    var currentNum;
 
     /*
      * カードをめくった時のメソッド
      */
-    this.flip = function() {
+    flip = function() {
+      var enableFlip = true;
       if (!enableFlip) {
         //flip()中に連打させない
         return;
       }
-      if (card.value != '?') {
+      if (cardElements.value != '?') {
+        //数字が表示されているときに連打されない
         return;
       }
-      card.value = card.dataset.num;
-      if (typeof currentNum === 'undefined') {
+      cardElements.value = cardElements.dataset.num;
+
+      if (typeof getCurrentNum === 'undefined') {
         // 上で開けたカードが1枚目のカードかを判定する
-        openedCard = card; 
-        currentNum = card.dataset.num;
+        openedCard = cardElements; 
+        currentNum = cardElements.dataset.num;
       } else {
         //2枚目をめくっているときの動作
-        judge(card);
         currentNum = undefined;
       }
     };
     /* flip() ここまで */
+
+    /*
+     * cardの動的生成
+     */
+    this.createCard = function(num) {
+      cardElements = document.createElement('input');
+      cardElements.type = 'button';
+      cardElements.value = '?';
+ //     cardElements.value = num;
+      cardElements.dataset.num = num;
+      cardElements.onclick = function() {
+        flip();
+      };
+      return cardElements;
+    };
+    /* createCard() ここまで */    
+
+    /*
+    * cardの取得
+    */
+    this.getCard = function() {
+      cardElements = document.getElementsByTagName('input');
+      return cardElements;
+    }
   }
   /* Cardクラスここまで */
 
-  var Game = function() {
+  var Game = function() {  
+    var CARD_NUM;
     var score = 0;
+    var fieldCards = [];
+    var currentNum = 0; //今開けたカードに何の数字が書かれていたか
+    var openedCard; // どのカードを開けたかを管理
+    
+    /*
+     * カードの数字をランダムに割り当てるメソッド
+     */
+    this.setCards = function(CARD_NUM) {
+      var num = 0,
+          cardIndex = 0,
+          i = 0,
+          stage = document.getElementById('stage');
+      
+      var card = new Card();
+
+      for (i = 0; i < CARD_NUM; i++) {
+        //num = Math.floor(i / 2);
+num = i;
+        do {
+          cardIndex = Math.floor(Math.random() * CARD_NUM);
+        } while(typeof fieldCards[cardIndex] !== 'undefined');
+        fieldCards[cardIndex] = card.createCard(num);
+      }
+      for (i = 0; i < CARD_NUM; i++) {
+        stage.appendChild(fieldCards[i]);
+        if (i % Math.sqrt
+            (CARD_NUM) == (Math.sqrt(CARD_NUM) - 1)) {
+          stage.appendChild(document.createElement('br'));
+        }
+      }
+    };
+    /* setCards() ここまで */
+
     /*
      * 正誤判定
      */
     this.judge = function(card) {
-      var correctNum = 0;
-      var timerId;
+      var correctNum = 0,
+        //timerId,
+        enableFlip = true;
+
       if (currentNum == card.dataset.num) {
         //正解
         correctNum++;
-        if (correctNum == CARD_NUM/2) {
+        if (correctNum == CARD_NUM/4) {
           clearTimeout(timerId);
           alert("your score is .." + document.getElementById('score').innerHTML);
         }
@@ -93,10 +125,9 @@
      * 早く全部開くことができた方が良いという形にするためタイマーで測定
      */
     this.runTimer = function() {
-      //var timer = new Game();
       document.getElementById('score').innerHTML = score++;
       timerId = setTimeout(function() {
-        arguments.callee();
+        runTimer();
       }, 100);
     };
     /* runTimer() ここまで */
@@ -104,25 +135,15 @@
   /* Gameクラスここまで */
 
   var View = function() {
-    /*
-     * cardの動的生成
-     */
-    this.createCard = function(num) {
-      var card = document.createElement('input');
-      card.type = 'button';
-      card.value = '?';
-      card.dataset.num = num;
-      card.onclick = function() {
-        flip(this);
-      };
-      return card;
-    };
-    /* createCard() ここまで */
   }
   /* Viewクラスここまで */
 
-  var suijaku = new Card();
-  suijaku.initCards();
   var game = new Game();
-  game.runTimer();
+  game.setCards(6);
+  /*
+   *！ここでfieldCardsのペア数指定したさあるな
+   *！そこまできたらもうhtmlのページで指定したいっしょ
+   *
+   */
+  //game.runTimer();
 })();
