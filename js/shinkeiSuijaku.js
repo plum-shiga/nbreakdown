@@ -1,14 +1,14 @@
 (function() {
-  /* ƒOƒ[ƒoƒ‹•Ï”ˆê® */
+  /* ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°ä¸€å¼ */
   var CARD_NUM = 16,
-      currentNum, //¡ŠJ‚¯‚½ƒJ[ƒh‚É‰½‚Ì”š‚ª‘‚©‚ê‚Ä‚¢‚½‚©
-      openedCard; // ‚Ç‚ÌƒJ[ƒh‚ğŠJ‚¯‚½‚©‚ğŠÇ—
+      currentNum, //ä»Šé–‹ã‘ãŸã‚«ãƒ¼ãƒ‰ã«ä½•ã®æ•°å­—ãŒæ›¸ã‹ã‚Œã¦ã„ãŸã‹
+      openedCard; // ã©ã®ã‚«ãƒ¼ãƒ‰ã‚’é–‹ã‘ãŸã‹ã‚’ç®¡ç†
   
   var Card = function() {
-    var cards = [];//cards[n]‚É‚Í0011‚ª‚»‚ê‚¼‚ê‡˜ƒ‰ƒ“ƒ_ƒ€‚Å4‚Â“ü‚é
+    var cards = [];//cards[n]ã«ã¯0011ãŒãã‚Œãã‚Œé †åºãƒ©ãƒ³ãƒ€ãƒ ã§4ã¤å…¥ã‚‹
 
     /*
-     * ƒJ[ƒh‚Ì”š‚ğƒ‰ƒ“ƒ_ƒ€‚ÉŠ„‚è“–‚Ä‚éƒƒ\ƒbƒh
+     * ã‚«ãƒ¼ãƒ‰ã®æ•°å­—ã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«å‰²ã‚Šå½“ã¦ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰
      */
     this.initCards = function() {
       var num,
@@ -32,14 +32,14 @@
         }
       }
     };
-    /* initCards() ‚±‚±‚Ü‚Å */
+    /* initCards() ã“ã“ã¾ã§ */
 
     /*
-     * ƒJ[ƒh‚ğ‚ß‚­‚Á‚½‚Ìƒƒ\ƒbƒh
+     * ã‚«ãƒ¼ãƒ‰ã‚’ã‚ãã£ãŸæ™‚ã®ãƒ¡ã‚½ãƒƒãƒ‰
      */
     this.flip = function() {
       if (!enableFlip) {
-        //flip()’†‚É˜A‘Å‚³‚¹‚È‚¢
+        //flip()ä¸­ã«é€£æ‰“ã•ã›ãªã„
         return;
       }
       if (card.value != '?') {
@@ -47,50 +47,50 @@
       }
       card.value = card.dataset.num;
       if (typeof currentNum === 'undefined') {
-        // ã‚ÅŠJ‚¯‚½ƒJ[ƒh‚ª1–‡–Ú‚ÌƒJ[ƒh‚©‚ğ”»’è‚·‚é
+        // ä¸Šã§é–‹ã‘ãŸã‚«ãƒ¼ãƒ‰ãŒ1æšç›®ã®ã‚«ãƒ¼ãƒ‰ã‹ã‚’åˆ¤å®šã™ã‚‹
         openedCard = card; 
         currentNum = card.dataset.num;
       } else {
-        //2–‡–Ú‚ğ‚ß‚­‚Á‚Ä‚¢‚é‚Æ‚«‚Ì“®ì
+        //2æšç›®ã‚’ã‚ãã£ã¦ã„ã‚‹ã¨ãã®å‹•ä½œ
         judge(card);
         currentNum = undefined;
       }
     };
-    /* flip() ‚±‚±‚Ü‚Å */
+    /* flip() ã“ã“ã¾ã§ */
   }
-  /* CardƒNƒ‰ƒX‚±‚±‚Ü‚Å */
+  /* Cardã‚¯ãƒ©ã‚¹ã“ã“ã¾ã§ */
 
   var Game = function() {
     var score = 0;
     /*
-     * ³Œë”»’è
+     * æ­£èª¤åˆ¤å®š
      */
     this.judge = function(card) {
       var correctNum = 0;
       var timerId;
       if (currentNum == card.dataset.num) {
-        //³‰ğ
+        //æ­£è§£
         correctNum++;
         if (correctNum == CARD_NUM/2) {
           clearTimeout(timerId);
           alert("your score is .." + document.getElementById('score').innerHTML);
         }
       } else {
-        //•s³‰ğ
+        //ä¸æ­£è§£
         enableFlip = false;
         setTimeout(function() {
-          //‘O‰ñ‚Ì
+          //å‰å›ã®
           openedCard.value = '?'
-          //¡‰ñ‚Ì
+          //ä»Šå›ã®
           card.value = '?';
           enableFlip = true;
         }, 700);
       }
     };
-    /* judge() ‚±‚±‚Ü‚Å*/
+    /* judge() ã“ã“ã¾ã§*/
 
     /*
-     * ‘‚­‘S•”ŠJ‚­‚±‚Æ‚ª‚Å‚«‚½•û‚ª—Ç‚¢‚Æ‚¢‚¤Œ`‚É‚·‚é‚½‚ßƒ^ƒCƒ}[‚Å‘ª’è
+     * æ—©ãå…¨éƒ¨é–‹ãã“ã¨ãŒã§ããŸæ–¹ãŒè‰¯ã„ã¨ã„ã†å½¢ã«ã™ã‚‹ãŸã‚ã‚¿ã‚¤ãƒãƒ¼ã§æ¸¬å®š
      */
     this.runTimer = function() {
       //var timer = new Game();
@@ -99,13 +99,13 @@
         arguments.callee();
       }, 100);
     };
-    /* runTimer() ‚±‚±‚Ü‚Å */
+    /* runTimer() ã“ã“ã¾ã§ */
   }
-  /* GameƒNƒ‰ƒX‚±‚±‚Ü‚Å */
+  /* Gameã‚¯ãƒ©ã‚¹ã“ã“ã¾ã§ */
 
   var View = function() {
     /*
-     * card‚Ì“®“I¶¬
+     * cardã®å‹•çš„ç”Ÿæˆ
      */
     this.createCard = function(num) {
       var card = document.createElement('input');
@@ -117,9 +117,9 @@
       };
       return card;
     };
-    /* createCard() ‚±‚±‚Ü‚Å */
+    /* createCard() ã“ã“ã¾ã§ */
   }
-  /* ViewƒNƒ‰ƒX‚±‚±‚Ü‚Å */
+  /* Viewã‚¯ãƒ©ã‚¹ã“ã“ã¾ã§ */
 
   var suijaku = new Card();
   suijaku.initCards();
