@@ -1,7 +1,29 @@
+/*
+ *  GameにViewをわたす
+ *  わたすViewによってhtmlでゲームできるか、
+ *  コンソールでゲームできるようにする
+ *
+ *  GameのコンストラクタにViewを流す
+ *  コンストラクタ呼び出し部分の一行のコードを変えるだけで
+ *  ゲームを使い分けられるようにする
+ *
+
+Game
+コンパネに表示したのを操作する何か（キーボード対応でもいい）
+
+view
+view.createCaredHtml
+view.createCardConsole(){
+  クリックじゃないflipじゃない別の操作方法
+}
+ *
+ *
+ * */
+
 (function() {
   var Card = function() {
-    var game = new Game();
   };
+  
   Card.prototype.openedCard;
   Card.prototype.currentNum;  //今開けたカードに何の数字が書かれていたか
 
@@ -34,8 +56,9 @@
   /* flip() ここまで */
   /* Cardクラスここまで */
 
-  var Game = function() {
-  }
+  var Game = function(num, mode) {
+    this.setCards(6, mode);
+  };
 
   Game.prototype.timerID;
   Game.prototype.CARD_NUM = 0;
@@ -48,31 +71,37 @@
    * setCard();
    * カードの数字をランダムに割り当てるメソッド
    */
-  Game.prototype.setCards = function(CARD_NUM) {
+  Game.prototype.setCards = function(CARD_NUM, view) {
     var num = 0,
         cardIndex = 0,
         i = 0,
         stage = document.getElementById('stage');
     this.CARD_NUM = CARD_NUM;
     
-    var view = new View();
-
-console.log("setCardsの中のthis.CARD_NUM is " + this.CARD_NUM);
 
     for (i = 0; i < CARD_NUM; i++) {
       num = Math.floor(i / 2);
       do {
         cardIndex = Math.floor(Math.random() * CARD_NUM);
       } while(typeof this.fieldCards[cardIndex] !== 'undefined');
-      this.fieldCards[cardIndex] = view.createCard(num);
-    }
-    for (i = 0; i < CARD_NUM; i++) {
-      stage.appendChild(this.fieldCards[i]);
-      if (i % Math.sqrt(CARD_NUM) == (Math.sqrt(CARD_NUM) - 1)) {
-        stage.appendChild(document.createElement('br'));
+      if(view instanceof HtmlView) {
+        this.fieldCards[cardIndex] = view.createCard(num);
+      }else{
+        this.fieldCards[cardIndex] = num;
       }
     }
-    this.runTimer();
+    for (i = 0; i < CARD_NUM; i++) {
+      if(view instanceof HtmlView) {
+        stage.appendChild(this.fieldCards[i]);
+        if (i % Math.sqrt(CARD_NUM) == (Math.sqrt(CARD_NUM) - 1)) {
+          stage.appendChild(document.createElement('br'));
+        }
+      }else{
+//ここで改行なしでコンソールに表示させる
+        //print(this.fieldCards[i]);
+      }
+    }
+//    this.runTimer();
   };
   /* setCards() ここまで */
 
@@ -98,13 +127,10 @@ console.log("setCardsの中のthis.CARD_NUM is " + this.CARD_NUM);
    * 正誤判定
    */
   Game.prototype.judge = function(cardElement, openedCard, enbaleFlip, currentNum) {
-console.log("currentNum is"+currentNum);
-console.log("cardElement.dataset.num is" + cardElement.dataset.num);
     if (currentNum == cardElement.dataset.num) {
       //正解
       this.correctNum++;
       if (this.correctNum == this.CARD_NUM / 2 + 1) {
-console.log("in");
         clearTimeout(this.timerID);
         alert("your score is .." + document.getElementById('score').innerHTML);
       }
@@ -121,19 +147,20 @@ console.log("in");
     }
   };
   /* judge() ここまで*/
+
   /* Gameクラスここまで */
 
-  var View = function() {
-  }
+  var HtmlView = function() {
+  };
 
-  View.prototype.card = new Card();
-  View.prototype.cardElements;
+  HtmlView.prototype.cardElements;
+  HtmlView.prototype.card = new Card();
 
   /*
    * createCard();
    * cardの動的生成
    */
-  View.prototype.createCard = function(num) {
+  HtmlView.prototype.createCard = function(num) {
     var self = this;
     cardElements = document.createElement('input');
     cardElements.type = 'button';
@@ -142,16 +169,55 @@ console.log("in");
     cardElements.onclick = function() {
       self.card.flip(this);
       /*
-       *  this = まさに生成したinput要素そのものを
+       *  this = まさに生
+       *  成したinput要素そのものを
        *  もしcardElementsにすると最後にできたcardElementsになるので注意！
        */
     };
     return cardElements;
   };
   /* createCard() ここまで */    
+  /* HtmlViewクラスここまで */
 
-  /* Viewクラスここまで */
+  var ConsoleView = function() {
+  };
+  
+  ConsoleView.prototype.cardElements;
 
-  var game = new Game();
-  game.setCards(6);
+  /*
+   * createCard();
+   * cardの動的生成
+   */
+  ConsoleView.prototype.createCard = function() {
+/*
+    var self = this;
+    cardElements = document.createElement('input');
+    cardElements.type = 'button';
+    cardElements.value = '?';
+    cardElements.dataset.num = num;
+    cardElements.onclick = function() {
+      self.card.flip(this);
+      /*
+       *  this = まさに生
+       *  成したinput要素そのものを
+       *  もしcardElementsにすると最後にできたcardElementsになるので注意！
+       
+    };
+    return cardElements;
+*/
+  };
+  /* createCard() ここまで */    
+  /* ConsoleViewクラスここまで */
+
+
+  var viewHtml = new HtmlView();
+  var viewConsole = new ConsoleView();
+
+  var game = new Game(6, viewConsole);
+
+  /*
+   * ここにDIするもの変えるだけでhtmlかコンパネか
+   * どうか変えるっていうことなんやろ
+   * これ終わったら、今回の内容にQiitaにかこな
+   */
 })();
