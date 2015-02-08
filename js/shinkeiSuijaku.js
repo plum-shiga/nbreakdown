@@ -215,9 +215,4 @@ view.createCardConsole(){
 
   var game = new Game(6, viewConsole);
 
-  /*
-   * ここにDIするもの変えるだけでhtmlかコンパネか
-   * どうか変えるっていうことなんやろ
-   * これ終わったら、今回の内容にQiitaにかこな
-   */
 })();
