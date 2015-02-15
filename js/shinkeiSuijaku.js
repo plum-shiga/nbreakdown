@@ -7,17 +7,6 @@
  *  コンストラクタ呼び出し部分の一行のコードを変えるだけで
  *  ゲームを使い分けられるようにする
  *
-
-Game
-コンパネに表示したのを操作する何か（キーボード対応でもいい）
-
-view
-view.createCaredHtml
-view.createCardConsole(){
-  クリックじゃないflipじゃない別の操作方法
-}
- *
- *
  * */
 
 (function() {
@@ -41,11 +30,9 @@ view.createCardConsole(){
       //数字が表示されているときに連打されない
       return;
     }
-    cardElements.value = cardElements.dataset.num;
-    
     if (typeof this.currentNum === 'undefined') {
       // 上で開けたカードが1枚目のカードかを判定する
-      this.openedCard = cardElements; 
+      this.openedCard = cardElements;
       this.currentNum = cardElements.dataset.num;
     } else {
       //2枚目をめくっているときの動作
@@ -54,6 +41,30 @@ view.createCardConsole(){
     }
   };
   /* flip() ここまで */
+
+  Card.prototype.flip = function(num, position, fieldCards, element) {
+    var enableFlip = true;
+    var currentPosition = 0;
+    if (!enableFlip) {
+      //flip()中に連打させない
+      return;
+    }
+    fieldCards[position-1] = num;
+    console.log(fieldCards);
+    if (typeof this.currentNum === 'undefined') {
+      // 上で開けたカードが1枚目のカードかを判定する
+      this.openedCard = position;
+      this.currentNum = num;
+    } else {
+      //2枚目をめくっているときの動作
+//      console.log("in");
+      game.judge(this.openedCard, enableFlip, this.currentNum, fieldCards, element);
+      this.currentNum = undefined;
+    }
+
+  };
+  /* flip() ここまで */
+
   /* Cardクラスここまで */
 
   var Game = function(num, mode) {
@@ -66,6 +77,7 @@ view.createCardConsole(){
   Game.prototype.fieldCards = [];
   Game.prototype.openedCard; // どのカードを開けたかを管理
   Game.prototype.correctNum = 1;
+  Game.prototype.randomArray = [];
   
   /*
    * setCard();
@@ -78,16 +90,21 @@ view.createCardConsole(){
         stage = document.getElementById('stage');
     this.CARD_NUM = CARD_NUM;
     
-
+    
     for (i = 0; i < CARD_NUM; i++) {
       num = Math.floor(i / 2);
-      do {
-        cardIndex = Math.floor(Math.random() * CARD_NUM);
-      } while(typeof this.fieldCards[cardIndex] !== 'undefined');
       if(view instanceof HtmlView) {
+        do {
+          cardIndex = Math.floor(Math.random() * CARD_NUM);
+        } while(typeof this.fieldCards[cardIndex] !== 'undefined');
         this.fieldCards[cardIndex] = view.createCard(num);
-      }else{
-        this.fieldCards[cardIndex] = num;
+      }else{        
+        do {
+          cardIndex = Math.floor(Math.random() * CARD_NUM);
+        } while(typeof this.randomArray[cardIndex] !== 'undefined');
+        var sheet = i+1;
+        this.fieldCards[i] = "Card" + sheet;
+        this.randomArray[cardIndex] = num;
       }
     }
     for (i = 0; i < CARD_NUM; i++) {
@@ -97,11 +114,11 @@ view.createCardConsole(){
           stage.appendChild(document.createElement('br'));
         }
       }else{
-//ここで改行なしでコンソールに表示させる
-        //print(this.fieldCards[i]);
+      stage.appendChild(view.createSwitch(this.randomArray[i], this.fieldCards[i], this.fieldCards, i));
       }
     }
-//    this.runTimer();
+    console.log(this.fieldCards);
+//  this.runTimer();
   };
   /* setCards() ここまで */
 
@@ -126,7 +143,34 @@ view.createCardConsole(){
    * judge();
    * 正誤判定
    */
-  Game.prototype.judge = function(cardElement, openedCard, enbaleFlip, currentNum) {
+  Game.prototype.judge = function(openedCard, enbaleFlip, currentNum, fieldCards, element) {
+    if (currentNum == element.dataset.num) {
+      //正解
+      this.correctNum++;
+      if (this.correctNum == this.CARD_NUM / 2 + 1) {
+        clearTimeout(this.timerID);
+        alert("your score is .." + document.getElementById('score').innerHTML);
+      }
+    } else {
+      //不正解
+      enableFlip = false;
+
+      setTimeout(function() {
+        //前回の
+        fieldCards[openedCard-1] = "Card" + openedCard;
+        //今回の
+        fieldCards[element.dataset.position-1] = "Card" + element.dataset.position;
+      console.log("timeOutの中の方");//何故か後に呼び出される
+      console.log(fieldCards);
+      }, 700);
+      enableFlip = true;
+      console.log("裏返します");//なぜか先に呼び出される
+      console.log(fieldCards);
+    }
+  };
+
+  /*
+  Game.prototype.judge = function(openedCard, enbaleFlip, currentNum, cardElements) {
     if (currentNum == cardElement.dataset.num) {
       //正解
       this.correctNum++;
@@ -146,6 +190,7 @@ view.createCardConsole(){
       enableFlip = true;
     }
   };
+  */
   /* judge() ここまで*/
 
   /* Gameクラスここまで */
@@ -168,11 +213,6 @@ view.createCardConsole(){
     cardElements.dataset.num = num;
     cardElements.onclick = function() {
       self.card.flip(this);
-      /*
-       *  this = まさに生
-       *  成したinput要素そのものを
-       *  もしcardElementsにすると最後にできたcardElementsになるので注意！
-       */
     };
     return cardElements;
   };
@@ -182,29 +222,24 @@ view.createCardConsole(){
   var ConsoleView = function() {
   };
   
-  ConsoleView.prototype.cardElements;
+  ConsoleView.prototype.changeElements;
+  ConsoleView.prototype.card = new Card();
 
   /*
-   * createCard();
-   * cardの動的生成
+   * createSwitch();
+   * コンソールの数字を操作するメソッド
    */
-  ConsoleView.prototype.createCard = function() {
-/*
+  ConsoleView.prototype.createSwitch = function(num, Cards, fieldCards, i) {
     var self = this;
-    cardElements = document.createElement('input');
-    cardElements.type = 'button';
-    cardElements.value = '?';
-    cardElements.dataset.num = num;
-    cardElements.onclick = function() {
-      self.card.flip(this);
-      /*
-       *  this = まさに生
-       *  成したinput要素そのものを
-       *  もしcardElementsにすると最後にできたcardElementsになるので注意！
-       
+    changeElements = document.createElement('input');
+    changeElements.type = 'button';
+    changeElements.value = 'めくる';
+    changeElements.dataset.num = num;
+    changeElements.dataset.position = i+1;
+    changeElements.onclick = function() {
+      self.card.flip(this.dataset.num, this.dataset.position, fieldCards, this);
     };
-    return cardElements;
-*/
+    return changeElements;
   };
   /* createCard() ここまで */    
   /* ConsoleViewクラスここまで */
