@@ -7,6 +7,17 @@
  *  コンストラクタ呼び出し部分の一行のコードを変えるだけで
  *  ゲームを使い分けられるようにする
  *
+
+Game
+コンパネに表示したのを操作する何か（キーボード対応でもいい）
+
+view
+view.createCaredHtml
+view.createCardConsole(){
+  クリックじゃないflipじゃない別の操作方法
+}
+ *
+ *
  * */
 
 (function() {
@@ -49,6 +60,13 @@
       //flip()中に連打させない
       return;
     }
+    /*
+    if (num != '?') {
+      //数字が表示されているときに連打されない
+      return;
+    }
+    */
+
     fieldCards[position-1] = num;
     console.log(fieldCards);
     if (typeof this.currentNum === 'undefined') {
@@ -57,7 +75,6 @@
       this.currentNum = num;
     } else {
       //2枚目をめくっているときの動作
-//      console.log("in");
       game.judge(this.openedCard, enableFlip, this.currentNum, fieldCards, element);
       this.currentNum = undefined;
     }
@@ -154,22 +171,21 @@
     } else {
       //不正解
       enableFlip = false;
-
       setTimeout(function() {
         //前回の
         fieldCards[openedCard-1] = "Card" + openedCard;
         //今回の
         fieldCards[element.dataset.position-1] = "Card" + element.dataset.position;
-      console.log("timeOutの中の方");//何故か後に呼び出される
-      console.log(fieldCards);
+        console.log("裏返します");
+        console.log(fieldCards);
       }, 700);
       enableFlip = true;
-      console.log("裏返します");//なぜか先に呼び出される
-      console.log(fieldCards);
     }
   };
 
   /*
+   *  オーバーライドがうまくいかない！
+   *
   Game.prototype.judge = function(openedCard, enbaleFlip, currentNum, cardElements) {
     if (currentNum == cardElement.dataset.num) {
       //正解
@@ -213,6 +229,11 @@
     cardElements.dataset.num = num;
     cardElements.onclick = function() {
       self.card.flip(this);
+      /*
+       *  this = まさに生成したinput要素そのもの
+       *  もしcardElementsにすると最後にできた
+       *  cardElementsになるので注意！
+       */
     };
     return cardElements;
   };
@@ -237,6 +258,11 @@
     changeElements.dataset.num = num;
     changeElements.dataset.position = i+1;
     changeElements.onclick = function() {
+    /* 
+      for(var i = 0; i<6; i++){
+        console.log("fieldCardsの"+i+"番目は"+fieldCards[i]);
+      }
+      */
       self.card.flip(this.dataset.num, this.dataset.position, fieldCards, this);
     };
     return changeElements;
