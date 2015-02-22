@@ -1,25 +1,3 @@
-/*
- *  GameにViewをわたす
- *  わたすViewによってhtmlでゲームできるか、
- *  コンソールでゲームできるようにする
- *
- *  GameのコンストラクタにViewを流す
- *  コンストラクタ呼び出し部分の一行のコードを変えるだけで
- *  ゲームを使い分けられるようにする
- *
-
-Game
-コンパネに表示したのを操作する何か（キーボード対応でもいい）
-
-view
-view.createCaredHtml
-view.createCardConsole(){
-  クリックじゃないflipじゃない別の操作方法
-}
- *
- *
- * */
-
 (function() {
   var Card = function() {
   };
@@ -31,7 +9,16 @@ view.createCardConsole(){
    * flip();
    * カードをめくった時のメソッド
    */
-  Card.prototype.flip = function(cardElements) {   
+
+  Card.prototype.flip = function(elements, num, position, fieldCards) {
+    if (arguments.length == 1) {
+      this.flipHtml(elements);
+    }else{
+      this.flipConsole(num, position, elements, fieldCards);
+    }
+  }
+
+  Card.prototype.flipHtml = function(cardElements) {
     var enableFlip = true;
     if (!enableFlip) {
       //flip()中に連打させない
@@ -41,31 +28,27 @@ view.createCardConsole(){
       //数字が表示されているときに連打されない
       return;
     }
+    cardElements.value = cardElements.dataset.num;
     if (typeof this.currentNum === 'undefined') {
       // 上で開けたカードが1枚目のカードかを判定する
       this.openedCard = cardElements;
       this.currentNum = cardElements.dataset.num;
     } else {
       //2枚目をめくっているときの動作
-      game.judge(cardElements, this.openedCard, enableFlip, this.currentNum);
+      game.judgeHtml(this.openedCard, enableFlip, this.currentNum, cardElements);
       this.currentNum = undefined;
     }
   };
-  /* flip() ここまで */
 
-  Card.prototype.flip = function(num, position, fieldCards, element) {
+  Card.prototype.flipConsole = function(num, position, elements, fieldCards) {
     var enableFlip = true;
-    var currentPosition = 0;
     if (!enableFlip) {
       //flip()中に連打させない
       return;
     }
-    /*
-    if (num != '?') {
-      //数字が表示されているときに連打されない
-      return;
-    }
-    */
+    var enableFlip = true;
+    var currentPosition = 0;
+
 
     fieldCards[position-1] = num;
     console.log(fieldCards);
@@ -75,12 +58,10 @@ view.createCardConsole(){
       this.currentNum = num;
     } else {
       //2枚目をめくっているときの動作
-      game.judge(this.openedCard, enableFlip, this.currentNum, fieldCards, element);
+      game.judgeConsole(this.openedCard, enableFlip, this.currentNum, elements, fieldCards);
       this.currentNum = undefined;
     }
-
   };
-  /* flip() ここまで */
 
   /* Cardクラスここまで */
 
@@ -134,8 +115,10 @@ view.createCardConsole(){
       stage.appendChild(view.createSwitch(this.randomArray[i], this.fieldCards[i], this.fieldCards, i));
       }
     }
-    console.log(this.fieldCards);
-//  this.runTimer();
+    if(view instanceof ConsoleView) {
+      console.log(this.fieldCards);
+    }
+  this.runTimer();
   };
   /* setCards() ここまで */
 
@@ -155,12 +138,35 @@ view.createCardConsole(){
     }, 100);
   };
   /* runTimer() ここまで */
+  
+  Game.prototype.judgeHtml = function(openedCard, enbaleFlip, currentNum, element) {
+    if (currentNum == element.dataset.num) {
+      //正解
+      this.correctNum++;
+      if (this.correctNum == this.CARD_NUM / 2 + 1) {
+        clearTimeout(this.timerID);
+        alert("your score is .." + document.getElementById('score').innerHTML);
+      }
+    } else {
+      //不正解
+      enableFlip = false;
+      setTimeout(function() {
+        //前回の
+        openedCard.value = '?'
+        //今回の
+        element.value = '?';
+      }, 700);
+      enableFlip = true;
+    }
+  };
+  /* judge() ここまで*/
 
-  /*
-   * judge();
-   * 正誤判定
-   */
-  Game.prototype.judge = function(openedCard, enbaleFlip, currentNum, fieldCards, element) {
+  Game.prototype.judgeConsole = function(openedCard, enbaleFlip, currentNum, element, fieldCards) {
+    /*
+     * fieldCards: 実際のカードの配列
+     * element: 単独の要素
+     * */
+
     if (currentNum == element.dataset.num) {
       //正解
       this.correctNum++;
@@ -182,32 +188,8 @@ view.createCardConsole(){
       enableFlip = true;
     }
   };
+  
 
-  /*
-   *  オーバーライドがうまくいかない！
-   *
-  Game.prototype.judge = function(openedCard, enbaleFlip, currentNum, cardElements) {
-    if (currentNum == cardElement.dataset.num) {
-      //正解
-      this.correctNum++;
-      if (this.correctNum == this.CARD_NUM / 2 + 1) {
-        clearTimeout(this.timerID);
-        alert("your score is .." + document.getElementById('score').innerHTML);
-      }
-    } else {
-      //不正解
-      enableFlip = false;
-      setTimeout(function() {
-        //前回の
-        openedCard.value = '?'
-        //今回の
-        cardElement.value = '?';
-      }, 700);
-      enableFlip = true;
-    }
-  };
-  */
-  /* judge() ここまで*/
 
   /* Gameクラスここまで */
 
@@ -258,11 +240,6 @@ view.createCardConsole(){
     changeElements.dataset.num = num;
     changeElements.dataset.position = i+1;
     changeElements.onclick = function() {
-    /* 
-      for(var i = 0; i<6; i++){
-        console.log("fieldCardsの"+i+"番目は"+fieldCards[i]);
-      }
-      */
       self.card.flip(this.dataset.num, this.dataset.position, fieldCards, this);
     };
     return changeElements;
