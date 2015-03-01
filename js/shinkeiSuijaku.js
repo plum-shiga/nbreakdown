@@ -14,33 +14,36 @@
     if (arguments.length == 1) {
       this.flipHtml(elements);
     }else{
-      this.flipConsole(num, position, elements, fieldCards);
+      this.flipConsole(elements, num, position, fieldCards);
     }
   }
 
-  Card.prototype.flipHtml = function(cardElements) {
+  Card.prototype.flipHtml = function(elements) {
     var enableFlip = true;
     if (!enableFlip) {
       //flip()中に連打させない
+      console.log("in Return A");
       return;
     }
-    if (cardElements.value != '?') {
+    if (elements.value != '?') {
       //数字が表示されているときに連打されない
-      return;
+      console.log("in Return B");
+      //return;
     }
-    cardElements.value = cardElements.dataset.num;
+    elements.value = elements.dataset.num;
     if (typeof this.currentNum === 'undefined') {
       // 上で開けたカードが1枚目のカードかを判定する
-      this.openedCard = cardElements;
-      this.currentNum = cardElements.dataset.num;
+      this.openedCard = elements;
+      this.currentNum = elements.dataset.num;
     } else {
       //2枚目をめくっているときの動作
-      game.judgeHtml(this.openedCard, enableFlip, this.currentNum, cardElements);
+      console.log("2nd Card");
+      game.judgeHtml(this.openedCard, enableFlip, this.currentNum, elements);
       this.currentNum = undefined;
     }
   };
 
-  Card.prototype.flipConsole = function(num, position, elements, fieldCards) {
+  Card.prototype.flipConsole = function(elements, num, position, fieldCards) {
     var enableFlip = true;
     if (!enableFlip) {
       //flip()中に連打させない
@@ -49,15 +52,17 @@
     var enableFlip = true;
     var currentPosition = 0;
 
-
     fieldCards[position-1] = num;
-    console.log(fieldCards);
     if (typeof this.currentNum === 'undefined') {
+      console.log("一枚目のカードは");
+      console.log(fieldCards);
       // 上で開けたカードが1枚目のカードかを判定する
       this.openedCard = position;
       this.currentNum = num;
     } else {
-      //2枚目をめくっているときの動作
+      //2枚目をめくっているとき
+      console.log("二枚目のカードは");
+      console.log(fieldCards);
       game.judgeConsole(this.openedCard, enableFlip, this.currentNum, elements, fieldCards);
       this.currentNum = undefined;
     }
@@ -88,7 +93,6 @@
         stage = document.getElementById('stage');
     this.CARD_NUM = CARD_NUM;
     
-    
     for (i = 0; i < CARD_NUM; i++) {
       num = Math.floor(i / 2);
       if(view instanceof HtmlView) {
@@ -116,6 +120,7 @@
       }
     }
     if(view instanceof ConsoleView) {
+      console.log("現在のカードです");
       console.log(this.fieldCards);
     }
   this.runTimer();
@@ -139,8 +144,11 @@
   };
   /* runTimer() ここまで */
   
-  Game.prototype.judgeHtml = function(openedCard, enbaleFlip, currentNum, element) {
-    if (currentNum == element.dataset.num) {
+  Game.prototype.judgeHtml = function(openedCard, enbaleFlip, currentNum, elements) {
+
+    //game.judgeHtml(this.openedCard, enableFlip, this.currentNum, elements);
+    
+    if (currentNum == elements.dataset.num) {
       //正解
       this.correctNum++;
       if (this.correctNum == this.CARD_NUM / 2 + 1) {
@@ -154,20 +162,21 @@
         //前回の
         openedCard.value = '?'
         //今回の
-        element.value = '?';
+        elements.value = '?';
       }, 700);
       enableFlip = true;
     }
   };
   /* judge() ここまで*/
 
-  Game.prototype.judgeConsole = function(openedCard, enbaleFlip, currentNum, element, fieldCards) {
+  Game.prototype.judgeConsole = function(openedCard, enableFlip, currentNum, element, fieldCards) {
     /*
-     * fieldCards: 実際のカードの配列
-     * element: 単独の要素
-     * */
+     *      game.judgeConsole(this.openedCard, enableFlip, this.currentNum, elements, fieldCards);
+     */
 
-    if (currentNum == element.dataset.num) {
+    console.log(element);
+
+     if (currentNum == element.dataset.num) {
       //正解
       this.correctNum++;
       if (this.correctNum == this.CARD_NUM / 2 + 1) {
@@ -189,8 +198,6 @@
     }
   };
   
-
-
   /* Gameクラスここまで */
 
   var HtmlView = function() {
@@ -234,13 +241,14 @@
    */
   ConsoleView.prototype.createSwitch = function(num, Cards, fieldCards, i) {
     var self = this;
+    var iplus = i+1;
     changeElements = document.createElement('input');
     changeElements.type = 'button';
-    changeElements.value = 'めくる';
+    changeElements.value = 'Card'+iplus;
     changeElements.dataset.num = num;
-    changeElements.dataset.position = i+1;
+    changeElements.dataset.position = iplus;
     changeElements.onclick = function() {
-      self.card.flip(this.dataset.num, this.dataset.position, fieldCards, this);
+      self.card.flip(this, this.dataset.num, this.dataset.position, fieldCards);
     };
     return changeElements;
   };
