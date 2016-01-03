@@ -12,6 +12,20 @@
 
 <body> 
   <h4>javaScriptで神経衰弱</h4>
+  <h5>カードの枚数</h5>
+  <form action="#"> <!-- 1つ目のフォーム - forms[0] -->
+    <input type="text"> <!-- 1つ目のフォームの2つ目のエレメント - elements[1] -->
+    <input type="button" value="セット" onclick="str_move2();">
+  </form>
+  <h5>ゲームモード</h5>
+  <form action="#"> <!-- 1つ目のフォーム - forms[0] -->
+    <input type="radio" name="default" value="サンプル">そのまま
+    <input type="radio" name="console" value="サンプル">コンソール
+  </form>
+  <form action="#"> <!-- 1つ目のフォーム - forms[0] -->
+    <input type="button" value="ゲームスタート" onclick="str_move2();">
+  </form>
+
   <p>Score: <span id = "score"></span></p>
   <div id = "stage"></div>
   <script type = "text/javascript" src = "./js/shinkeiSuijaku.js" ></script>
